@@ -47,6 +47,14 @@ For your second milestone, explain what you've worked on since your previous mil
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/E4Ixx-fknwE?si=F10kFoW4hW13Q_tX" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
+Hello, my name is Jaiden and welcome to my first milestone video! I’m building a Ball-Tracking Robot. I chose this project because I wanted to learn more about RC vehicles and AI.
+
+The robot uses motors, a motor controller, ultrasonic sensors, a camera, a breadboard, a Raspberry Pi, and two power supplies. The motor controller allows the Raspberry Pi to control the motors without powering them directly — instead, the motors get a higher voltage from the battery packs. The ultrasonic sensors will let the robot detect obstacles in front of it so it can stop, and the camera connects to the Raspberry Pi to track the ball while acting as the brains of the robot. Everything is hooked up using wires and a breadboard, with each component connected to the appropriate power supply.
+
+So far, I’ve almost finished building the base robot; the only parts left to add are the ultrasonic sensors, the camera, and the code. The motors are already powered by the battery pack through the motor module, which lets us move the robot forward and backward.
+
+Next, I plan to finish this first version by swapping the main camera for a day-and-night-vision one. I’ll also be housing all the electronics either in this chassis or in a different style RC car.
+
 For your first milestone, describe what your project is and how you plan to build it. You can include:
 - An explanation about the different components of your project and how they will all integrate together
 - Technical progress you've made so far
