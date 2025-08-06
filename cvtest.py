@@ -61,15 +61,6 @@ def stop_all():
 
 
 
-
-
-
-
-
-
-
-
-
 app = Flask(__name__)
 
 
@@ -107,6 +98,7 @@ def track_red_ball(frame):
 
 
    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+   
 
 
    if contours:
@@ -118,18 +110,21 @@ def track_red_ball(frame):
            offset = cx - CENTER_X
 
 
-           if abs(offset) < 60:
+           if abs(offset) < 50:
                position = "Centered"
+               time.sleep(0.1)  # Small delay to avoid jitter
                motorA_forward()
                motorB_forward()
                print('go forward')
            elif offset < 0:
                position = "Left"
+               time.sleep(0.1)  # Small delay to avoid jitter
                motorA_backward()
                motorB_forward()
                print('turn left')
            else:
                position = "Right"
+               time.sleep(0.1)  # Small delay to avoid jitter
                motorA_forward()
                motorB_backward()
                print('turn right')
@@ -146,6 +141,17 @@ def track_red_ball(frame):
                (255, 255, 255),
                2,
            )
+   else:
+      cv2.putText(
+    img=frame,
+    text="Where da red ball?",
+    org=(10, 60),
+    fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+    fontScale=0.7,
+    color=(255, 255, 255),
+    thickness=2
+   )      
+           
 
 
    return frame
