@@ -8,16 +8,16 @@ import RPi.GPIO as GPIO
 import time
 
 
-# Motor A pins
-A_IA = 18
-A_IB = 23
-# Motor B pins
-B_IA = 24
-B_IB = 13
+
+A_IA = 12   # was GPIO18
+A_IB = 16   # was GPIO23
+B_IA = 33   # was GPIO24
+B_IB = 18   # was GPIO13
+
 
 
 # Setup
-GPIO.setmode(GPIO.BCM)
+GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
 for pin in [A_IA, A_IB, B_IA, B_IB]:
    GPIO.setup(pin, GPIO.OUT)
@@ -118,12 +118,21 @@ def track_red_ball(frame):
            offset = cx - CENTER_X
 
 
-           if abs(offset) < 30:
+           if abs(offset) < 60:
                position = "Centered"
+               motorA_forward()
+               motorB_forward()
+               print('go forward')
            elif offset < 0:
                position = "Left"
+               motorA_backward()
+               motorB_forward()
+               print('turn left')
            else:
                position = "Right"
+               motorA_forward()
+               motorB_backward()
+               print('turn right')
 
 
            cv2.drawContours(frame, [largest], -1, (0, 255, 0), 2)
