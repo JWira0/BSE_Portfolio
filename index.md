@@ -53,13 +53,8 @@ The robot uses motors, a motor controller, ultrasonic sensors, a camera, a bread
 
 So far, I’ve almost finished building the base robot; the only parts left to add are the ultrasonic sensors, the camera, and the code. The motors are already powered by the battery pack through the motor module, which lets us move the robot forward and backward.
 
-Next, I plan to finish this first version by swapping the main camera for a day-and-night-vision one. I’ll also be housing all the electronics either in this chassis or in a different style RC car.
+Next, I plan to finish this first version by swapping the main camera for a day-and-night-vision one. I’ll also be housing all the electronics either in a different chasis as this one cannot fit all of the components.
 
-For your first milestone, describe what your project is and how you plan to build it. You can include:
-- An explanation about the different components of your project and how they will all integrate together
-- Technical progress you've made so far
-- Challenges you're facing and solving in your future milestones
-- What your plan is to complete your project
 
 # Schematics 
 Here's where you'll put images of your schematics. [Tinkercad](https://www.tinkercad.com/blog/official-guide-to-tinkercad-circuits) and [Fritzing](https://fritzing.org/learning/) are both great resoruces to create professional schematic diagrams, though BSE recommends Tinkercad becuase it can be done easily and for free in the browser. 
