@@ -7,6 +7,8 @@ from flask import Flask, Response, render_template_string, redirect, url_for
 
 import RPi.GPIO as GPIO
 import time
+import threading
+frame_bgr = None
 
 import atexit
 atexit.register(GPIO.cleanup)
@@ -191,22 +193,30 @@ CENTER_X = FRAME_WIDTH // 2
 
 
 def generate_frames():
-   while True:
-       frame = picam2.capture_array()
-       frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-       #frame = track_red_ball(frame)
+    global frame_bgr
+    while True:
+        if frame_bgr is None:
+            continue  # wait until a frame is captured
+        # Convert to JPEG
+        ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
+        jpg_frame = buffer.tobytes()
 
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n'
+               b'Content-Length: ' + f"{len(jpg_frame)}".encode() + b'\r\n\r\n' +
+               jpg_frame + b'\r\n')
+        time.sleep(0.03)  # to control frame rate a bit
 
-       ret, buffer = cv2.imencode('.jpg', frame)
-       jpg_frame = buffer.tobytes()
+def capture_frames():
+    global current_frame
+    global frame_bgr
 
+    while True:
+        # Capture one frame from the camera here
+        current_frame = picam2.capture_array() 
+        frame_bgr = cv2.cvtColor(current_frame, cv2.COLOR_RGB2BGR)
 
-       yield (b'--frame\r\n'
-              b'Content-Type: image/jpeg\r\n'
-              b'Content-Length: ' + f"{len(jpg_frame)}".encode() + b'\r\n\r\n' +
-              jpg_frame + b'\r\n')
-
-
+        time.sleep(0.03)
 
 
 @app.route('/')
@@ -243,6 +253,11 @@ def index():
 
    ''')
    
+
+
+   
+threading.Thread(target=capture_frames, daemon=True).start()
+
 @app.route('/forward')
 def forward():
     forward_all()
@@ -271,11 +286,11 @@ def stop():
 
 
 
-
 @app.route('/video_feed')
 def video_feed():
-   return Response(generate_frames(),
-                   mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(generate_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 
 
