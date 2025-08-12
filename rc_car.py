@@ -3,6 +3,7 @@ from picamera2 import Picamera2
 import cv2
 import numpy as np
 
+from flask import Flask, Response, render_template_string, redirect, url_for
 
 import RPi.GPIO as GPIO
 import time
@@ -59,13 +60,13 @@ def forward_all(speed=70):
     for pwm in [pwm_A_IB, pwm_B_IB, pwm_C_IB, pwm_D_IB]:
         pwm.ChangeDutyCycle(0)
 
-def backward(speed=70):
+def backward_all(speed=70):
     for pwm in [pwm_A_IB, pwm_B_IB, pwm_C_IB, pwm_D_IB]:
         pwm.ChangeDutyCycle(speed)
     for pwm in [pwm_A_IA, pwm_B_IA, pwm_C_IA, pwm_D_IA]:
         pwm.ChangeDutyCycle(0)
 
-def turn_left(speed=70):
+def turn_left(speed=55):
     # Left side motors (A & C) go backward
     for pwm in [pwm_A_IB, pwm_C_IB]:
         pwm.ChangeDutyCycle(speed)
@@ -78,7 +79,7 @@ def turn_left(speed=70):
     for pwm in [pwm_B_IB, pwm_D_IB]:
         pwm.ChangeDutyCycle(0)
 
-def turn_right(speed=70):
+def turn_right(speed=55):
     # Left side motors (A & C) go forward
     for pwm in [pwm_A_IA, pwm_C_IA]:
         pwm.ChangeDutyCycle(speed)
@@ -90,20 +91,6 @@ def turn_right(speed=70):
         pwm.ChangeDutyCycle(50)
     for pwm in [pwm_B_IA, pwm_D_IA]:
         pwm.ChangeDutyCycle(0)
-
-def test_motor_A_forward():
-    stop_all()
-    pwm_A_IA.ChangeDutyCycle(70)
-    pwm_A_IB.ChangeDutyCycle(0)
-    time.sleep(2)
-    stop_all()
-
-def test_motor_A_backward():
-    stop_all()
-    pwm_A_IA.ChangeDutyCycle(0)
-    pwm_A_IB.ChangeDutyCycle(70)
-    time.sleep(2)
-    stop_all()
 
 
 app = Flask(__name__)
@@ -124,81 +111,81 @@ FRAME_WIDTH = frame.shape[1]
 CENTER_X = FRAME_WIDTH // 2
 
 
-def track_red_ball(frame):
-   hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+#def track_red_ball(frame):
+#   hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
 
-   # Masks for detecting red color
-   lower_red1 = np.array([0, 100, 100])
-   upper_red1 = np.array([10, 255, 255])
-   lower_red2 = np.array([160, 100, 100])
-   upper_red2 = np.array([179, 255, 255])
+#    # Masks for detecting red color
+#    lower_red1 = np.array([0, 100, 100])
+#    upper_red1 = np.array([10, 255, 255])
+#    lower_red2 = np.array([160, 100, 100])
+#    upper_red2 = np.array([179, 255, 255])
 
 
-   mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
-   mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
-   mask = cv2.bitwise_or(mask1, mask2)
-   mask = cv2.erode(mask, None, iterations=2)
-   mask = cv2.dilate(mask, None, iterations=2)
+#    mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
+#    mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
+#    mask = cv2.bitwise_or(mask1, mask2)
+#    mask = cv2.erode(mask, None, iterations=2)
+#    mask = cv2.dilate(mask, None, iterations=2)
 
 
-   contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+   #contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
    
 
 
-   if contours:
-       largest = max(contours, key=cv2.contourArea)
-       M = cv2.moments(largest)
-       if M["m00"] > 0:
-           cx = int(M["m10"] / M["m00"])
-           cy = int(M["m01"] / M["m00"])
-           offset = cx - CENTER_X
+#    if contours:
+#        largest = max(contours, key=cv2.contourArea)
+#        M = cv2.moments(largest)
+#        if M["m00"] > 0:
+#            cx = int(M["m10"] / M["m00"])
+#            cy = int(M["m01"] / M["m00"])
+#            offset = cx - CENTER_X
 
 
-           if abs(offset) < 50:
-               position = "Centered"
-               time.sleep(0.3)  # Small delay to avoid jitter
-               forward_all()
-               print('go forward')
-           elif offset < 0:
-               position = "Left"
-               time.sleep(0.3)  # Small delay to avoid jitter
-               print('turn left')
-               turn_left(30)
-           elif offset > 50:
-               position = "Right"
-               time.sleep(0.3)  # Small delay to avoid jitter
-               print('turn right')
-               turn_right(30)
-           else:
-                stop_all()
+#            if abs(offset) < 50:
+#                position = "Centered"
+#                #time.sleep(0.3)  # Small delay to avoid jitter
+#                #forward_all()
+#                print('go forward')
+#            elif offset < 0:
+#                position = "Left"
+#                #time.sleep(0.3)  # Small delay to avoid jitter
+#                print('turn left')
+#               #turn_left(30)
+#            elif offset > 50:
+#                position = "Right"
+#                #time.sleep(0.3)  # Small delay to avoid jitter
+#                print('turn right')
+#                #turn_right(30)
+#            else:
+#                 stop_all()
 
 
-           cv2.drawContours(frame, [largest], -1, (0, 255, 0), 2)
-           cv2.circle(frame, (cx, cy), 5, (255, 0, 0), -1)
-           cv2.putText(
-               frame,
-               f"Offset: {offset} ({position})",
-               (10, 30),
-               cv2.FONT_HERSHEY_SIMPLEX,
-               0.7,
-               (255, 255, 255),
-               2,
-           )
-   else:
-      cv2.putText(
-    img=frame,
-    text="Where da red ball?",
-    org=(10, 60),
-    fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-    fontScale=0.7,
-    color=(255, 255, 255),
-    thickness=2
-   )      
+#            cv2.drawContours(frame, [largest], -1, (0, 255, 0), 2)
+#            cv2.circle(frame, (cx, cy), 5, (255, 0, 0), -1)
+#            cv2.putText(
+#                frame,
+#                f"Offset: {offset} ({position})",
+#                (10, 30),
+#                cv2.FONT_HERSHEY_SIMPLEX,
+#                0.7,
+#                (255, 255, 255),
+#                2,
+#            )
+#    else:
+#       cv2.putText(
+#     img=frame,
+#     text="Where da red ball?",
+#     org=(10, 60),
+#     fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+#     fontScale=0.7,
+#     color=(255, 255, 255),
+#     thickness=2
+#    )      
            
 
 
-   return frame
+#return frame
 
 
 
@@ -207,7 +194,7 @@ def generate_frames():
    while True:
        frame = picam2.capture_array()
        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-       frame = track_red_ball(frame)
+       #frame = track_red_ball(frame)
 
 
        ret, buffer = cv2.imencode('.jpg', frame)
@@ -226,13 +213,61 @@ def generate_frames():
 def index():
    return render_template_string('''
        <html>
-       <head><title>Red Ball Tracking Stream</title></head>
-       <body>
-           <h2>Live Tracking</h2>
-           <img src="/video_feed">
-       </body>
-       </html>
+            <head>
+            <title>Red Ball Tracking Stream</title>
+            </head>
+            <body>
+            <h2>Live Tracking</h2>
+            <img src="/video_feed" style="max-width: 100%; height: auto;"/>
+
+            <div style="margin-top: 20px;">
+                <button onclick="sendCommand('forward')">Forward</button>
+                <button onclick="sendCommand('backward')">Backward</button>
+                <button onclick="sendCommand('left')">Left</button>
+                <button onclick="sendCommand('right')">Right</button>
+                <button onclick="sendCommand('stop')">Stop</button>
+            </div>
+
+            <script>
+                function sendCommand(command) {
+                fetch('/' + command)
+                    .then(response => response.text())
+                    .then(data => {
+                    console.log('Command sent:', data);
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            </script>
+            </body>
+        </html>
+
    ''')
+   
+@app.route('/forward')
+def forward():
+    forward_all()
+    return "OK"
+
+@app.route('/backward')
+def backward():
+    backward_all()
+    return "OK"
+
+@app.route('/left')
+def left():
+    turn_left()
+    return "OK"
+
+@app.route('/right')
+def right():
+    turn_right()
+    return "OK"
+
+@app.route('/stop')
+def stop():
+    stop_all()
+    return "OK"
+
 
 
 
