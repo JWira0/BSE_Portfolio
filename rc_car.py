@@ -198,7 +198,7 @@ def generate_frames():
         if frame_bgr is None:
             continue  # wait until a frame is captured
         # Convert to JPEG
-        ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
+        ret, buffer = cv2.imencode('.jpg', frame_bgr)
         jpg_frame = buffer.tobytes()
 
         yield (b'--frame\r\n'
